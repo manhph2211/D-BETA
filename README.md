@@ -18,7 +18,7 @@
 <br>
 
 <div align="center">
-    <img src="assets/C-MELT.gif" alt="Illustration of our contrastive masked ECG-language modeling technique"/>
+    <img src="assets/D-BETA.gif" alt="Illustration of our contrastive masked ECG-language modeling technique"/>
 </div>
 
 ## Introduction

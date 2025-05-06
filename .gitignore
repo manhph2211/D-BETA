@@ -19,7 +19,7 @@ data/*.zip
 data/*data
 data/*.csv
 data/trash
-data/pretrain
+data/pretrain/*.zip
 src/config/*manifest*/
 .env
 outputs/
