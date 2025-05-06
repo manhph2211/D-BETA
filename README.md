@@ -44,7 +44,7 @@ This repo provides a quick example of running D-BETA with zero-shot setting on C
 
 ```
 
-## Setups
+## Usage
 
 First, we need to create a new Python environment and install the following:
 
@@ -57,11 +57,12 @@ pip install -r requirements.txt
 
 Next, please download the CODE-test data from [here](https://zenodo.org/records/3765780) and put it into in the `data/downstream/code-test` directory. 
 
-Finally, we need to download the pre-trained model from [here](https://smu-my.sharepoint.com/:u:/g/personal/hm_pham_2023_phdcs_smu_edu_sg/EeuWpt1LaFFKkbWH5qmgSusB-XVE63LD9Xt66B2wdQyaaA?e=txcks6), and put it into `checkpoints` directory.
+Then, we need to download the pre-trained model from [here](https://smu-my.sharepoint.com/:u:/g/personal/hm_pham_2023_phdcs_smu_edu_sg/EeuWpt1LaFFKkbWH5qmgSusB-XVE63LD9Xt66B2wdQyaaA?e=txcks6), and put it into `checkpoints` directory.
 
-## Usage
+Finally, to run the code, we can just use the `example.ipynb` notebook. 
 
-To run the code, we can just use the `example.ipynb` notebook. 
+
+## References
 
 ```bibtex
 @misc{pham2024cmeltcontrastiveenhancedmasked,
