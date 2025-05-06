@@ -10,7 +10,6 @@ data/downstream/physionet2021
 data/downstream/ptbxl
 data/*.faiss
 data/*.json
-data/pretrain/*
 checkpoints/*.pth
 configs/*.txt
 data/raw
