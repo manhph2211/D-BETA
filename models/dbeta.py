@@ -90,7 +90,7 @@ class DBETA(PretrainingModel):
         self.multi_modal_language_pooler = Pooler(cfg.hidden_dim)
         self.multi_modal_language_pooler.apply(init_weights)
         
-        ## NOTE SIGLEP ##
+        ## NOTE ETS ##
     
         self.unimodal_ecg_pooler = Pooler(cfg.hidden_dim)
         self.unimodal_ecg_pooler.apply(init_weights)
@@ -108,34 +108,21 @@ class DBETA(PretrainingModel):
         
     @classmethod
     def build_model(cls, cfg, task=None):
-        """Build a new model instance."""
         return cls(cfg)
 
     def random_masking(self, x, mask_ratio):
         x_ = x[:, :1]
         x = x[:, 1:]
-        
         bsz, tsz, csz = x.shape
         len_keep = int(tsz * (1 - mask_ratio))
-        
-        noise = torch.rand(bsz, tsz, device=x.device)
-        
-        # sort noise for each sample
+        noise = torch.rand(bsz, tsz, device=x.device)        
         ids_shuffle = torch.argsort(noise, dim=1)
-        ids_restore = torch.argsort(ids_shuffle, dim=1)
-        
-        # keep the first subset
+        ids_restore = torch.argsort(ids_shuffle, dim=1)        
         ids_keep = ids_shuffle[:, :len_keep]
-        x_masked = torch.gather(x, dim=1, index=ids_keep.unsqueeze(-1).repeat(1, 1, csz))
-        
-        # generate the binary mask: 0 is keep, 1 is remove
+        x_masked = torch.gather(x, dim=1, index=ids_keep.unsqueeze(-1).repeat(1, 1, csz))        
         mask = torch.ones([bsz, tsz], device=x.device)
-        mask[:, :len_keep] = 0
-        
-        # unshuffle to get the binary mask
+        mask[:, :len_keep] = 0        
         mask = torch.gather(mask, dim=1, index=ids_restore)
-        
-        # append cls token
         x_masked = torch.cat((x_, x_masked), dim=1)
         
         return x_masked, mask, ids_restore
@@ -166,7 +153,7 @@ class DBETA(PretrainingModel):
 
         uni_modal_text_feats = self.multi_modal_language_proj(uni_modal_text_feats)
         
-        # NOTE This is for SIGLEP #
+        # NOTE This is for ETS #
         ret["uni_modal_text_feats"] = self.unimodal_language_pooler(uni_modal_text_feats)
         
         uni_modal_ecg_feats, ecg_padding_mask = (
@@ -215,7 +202,7 @@ class DBETA(PretrainingModel):
         
         uni_modal_ecg_feats = self.multi_modal_ecg_proj(uni_modal_ecg_feats)
 
-        # NOTE This is for SIGLEP #
+        # NOTE This is for ETS #
         ret["uni_modal_ecg_feats"] = self.unimodal_ecg_pooler(uni_modal_ecg_feats)
 
         if ecg_padding_mask is not None and ecg_padding_mask.any():
@@ -410,31 +397,19 @@ class MIMHead(nn.Module):
         self.decoder_pred = nn.Linear(self.decoder_hidden_dim, self.inferred_decoded_size * 12, bias=True)
 
     def forward(self, x, ids_restore):
-        # embed tokens
         x = self.decoder_embed(x)
-
-        # append mask tokens to sequence
         mask_tokens = self.mask_token.repeat(x.shape[0], ids_restore.shape[1] + 1 - x.shape[1], 1)
-        x_ = torch.cat([x[:, 1:, :], mask_tokens], dim=1)  # no cls token
-        x_ = torch.gather(x_, dim=1, index=ids_restore.unsqueeze(-1).repeat(1, 1, x.shape[2]))  # unshuffle
-        x = torch.cat([x[:, :1, :], x_], dim=1)  # append cls token
-
-        # add pos embed
+        x_ = torch.cat([x[:, 1:, :], mask_tokens], dim=1) 
+        x_ = torch.gather(x_, dim=1, index=ids_restore.unsqueeze(-1).repeat(1, 1, x.shape[2]))  
+        x = torch.cat([x[:, :1, :], x_], dim=1) 
         x = self.decoder_pos_embed(x)
-
-        # apply Transformer blocks
-        x = x.permute(1, 0, 2)  # (bsz, tsz, csz) -> (tsz, bsz, csz)
+        x = x.permute(1, 0, 2) 
         x = self.decoder(x)
-        x = x.permute(1, 0, 2)  # (tsz, bsz, csz) -> (bsz, tsz, csz)
+        x = x.permute(1, 0, 2)  
         x = self.decoder_norm(x)
-
-        # predictor projection
-        x = self.decoder_pred(x)
-        
-        # remove cls token
+        x = self.decoder_pred(x)        
         x = x[:, 1:, :]
         x = x.view(x.size(0), x.size(1), -1, self.inferred_decoded_size)
-
         return x
 
 class ITMHead(nn.Module):
@@ -457,17 +432,10 @@ class PositionalEncoding(nn.Module):
         self.register_buffer("pe", pe)
 
     def forward(self, x): 
-        """
-        Args:
-            x: Tensor, shape [batch_size, seq_len, embedding_dim]
-        """
-
         x = x + self.pe[:, :x.size(1)]
         return x
 
 class LayerNorm(nn.LayerNorm):
-    """Subclass torch's LayerNorm to handle fp16."""
-
     def forward(self, x: torch.Tensor):
         orig_type = x.dtype
         ret = super().forward(x.type(torch.float32))

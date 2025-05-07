@@ -138,7 +138,7 @@ class RawECGTextDataset(RawECGDataset):
             for i in neg_idcs:
                 text = self.normalize_text(samples[i]["text"])
                 least_sim_texts = faiss_read(text, self.faiss_lm, self.faiss_tokenizer, self.faiss_index, self.faiss_embedding_to_sample_map, 64)
-                random_negative = least_sim_texts #np.random.choice(least_sim_texts)
+                random_negative = least_sim_texts 
                 ids = self.tokenizer(
                     random_negative,
                     padding="max_length",
@@ -195,7 +195,7 @@ class RawECGTextDataset(RawECGDataset):
         return None
 
 
-class FileECGTextDataset(RawECGTextDataset):
+class ProcessedECGTextDataset(RawECGTextDataset):
     def __init__(self, manifest_path, num_buckets=0, **kwargs):
         super().__init__(**kwargs)
 

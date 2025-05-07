@@ -1,6 +1,6 @@
 {
     "model": {
-        "_name": "m3ae",
+        "_name": "m3ae", 
         "all_gather": false,
         "normalize": false,
         "filter": false,
@@ -11,6 +11,7 @@
         "encoder_ffn_embed_dim": 3072,
         "encoder_attention_heads": 12,
         "layer_norm_first": false,
+        "lead_masking": 0.5,
         "dropout": 0.1,
         "attention_dropout": 0.1,
         "activation_dropout": 0.0,
