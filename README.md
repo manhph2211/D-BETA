@@ -5,7 +5,7 @@
 </div>
 
 <div align="center"> 
-<a href="https://maxph2211.github.io/D-BETA/"><img src="https://img.shields.io/badge/Website-CMELT WebPage-blue?style=for-the-badge"></a>
+<a href="https://maxph2211.github.io/D-BETA/"><img src="https://img.shields.io/badge/Website-DBETA WebPage-blue?style=for-the-badge"></a>
 <a href="https://arxiv.org/pdf/2410.02131"><img src="https://img.shields.io/badge/arxiv-Paper-red?style=for-the-badge"></a>
 <a href="https://huggingface.co/Manhph2211"><img src="https://img.shields.io/badge/Checkpoint-%F0%9F%A4%97%20Hugging%20Face-White?style=for-the-badge"></a>
 </div>
