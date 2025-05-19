@@ -3,8 +3,6 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-## Thanks to the fairseq-signals project for these modules. Please refer https://github.com/Jwoo5/fairseq-signals/tree/master/fairseq_signals/modules for the original code.
-
 from .fp32_group_norm import Fp32GroupNorm
 from .grad_multiply import GradMultiply
 from .gumbel_vector_quantizer import GumbelVectorQuantizer

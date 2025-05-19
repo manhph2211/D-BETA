@@ -61,8 +61,10 @@ Then, we need to download the pre-trained model from [here](https://huggingface.
 
 Finally, to run the code, we can just use the `example.ipynb` notebook. 
 
+Quick Note: You can get more information about ECG processing code and literature from this nice [repo](https://github.com/Jwoo5/fairseq-signals/tree/master/fairseq_signals).
 
-## References
+```bash
+
 
 ```bibtex
 @misc{pham2025boostingmaskedecgtextautoencoders,
