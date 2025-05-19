@@ -65,10 +65,10 @@ Finally, to run the code, we can just use the `example.ipynb` notebook.
 ## References
 
 ```bibtex
-@misc{pham2024cmeltcontrastiveenhancedmasked,
+@misc{pham2025boostingmaskedecgtextautoencoders,
       title={Boosting Masked ECG-Text Auto-Encoders as Discriminative Learners}, 
-      author={Manh Pham and Aaqib Saeed and Dong Ma},
-      year={2024},
+      author={Hung Manh Pham and Aaqib Saeed and Dong Ma},
+      year={2025},
       eprint={2410.02131},
       archivePrefix={arXiv},
       primaryClass={cs.LG},

@@ -22,31 +22,11 @@ def compute_mask_indices(
     no_overlap: bool = False,
     min_space: int = 0,
 ) -> np.ndarray:
-    """
-    Computes random mask spans for a given shape
-
-    Args:
-        shape: the shape for which to compute masks.
-            should be of size 2 where first element is batch size and 2nd is timesteps
-        padding_mask: optional padding mask of the same size as shape, which will prevent masking padded elements
-        mask_prob: probability for each token to be chosen as start of the span to be masked. this will be multiplied by
-            number of timesteps divided by length of mask span to mask approximately this percentage of all elements.
-            however due to overlaps, the actual number will be smaller (unless no_overlap is True)
-        mask_type: how to compute mask lengths
-            static = fixed size
-            uniform = sample from uniform distribution [mask_other, mask_length*2]
-            normal = sample from normal distribution with mean mask_length and stdev mask_other. mask is min 1 element
-            poisson = sample from possion distribution with lambda = mask length
-        min_masks: minimum number of masked spans
-        no_overlap: if false, will switch to an alternative recursive algorithm that prevents spans from overlapping
-        min_space: only used if no_overlap is True, this is how many elements to keep unmasked between spans
-    """
 
     bsz, all_sz = shape
     mask = np.full((bsz, all_sz), False)
 
     all_num_mask = int(
-        # add a random number for probabilistic rounding
         mask_prob * all_sz / float(mask_length)
         + np.random.rand()
     )
@@ -58,7 +38,6 @@ def compute_mask_indices(
         if padding_mask is not None:
             sz = all_sz - padding_mask[i].long().sum().item()
             num_mask = int(
-                # add a random number for probabilistic rounding
                 mask_prob * sz / float(mask_length)
                 + np.random.rand()
             )

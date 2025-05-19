@@ -8,20 +8,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import faiss
 import json
 import random
-# from transformers import AutoTokenizer, AutoModel, T5EncoderModel
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# model_name="google/flan-t5-small"
-# tokenizer = AutoTokenizer.from_pretrained(model_name)
-# if "flan-t5" in model_name:
-#     model = T5EncoderModel.from_pretrained(model_name).to(device)
-# else:
-#     model = AutoModel.from_pretrained(model_name).to(device)
-    
+from transformers import AutoTokenizer, AutoModel, T5EncoderModel
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model_name="google/flan-t5-small"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = T5EncoderModel.from_pretrained(model_name).to(device)
     
 def process_text(text):
-    """
-    Process the given text by replacing specific terms and stripping unwanted characters.
-    """
     text = text.lower().strip()
     report = text.replace('ekg', 'ecg')
     report = report.strip('*** ').strip(' ***').strip('***').strip('=-').strip('=')
@@ -29,9 +23,6 @@ def process_text(text):
 
 
 def process_file(mat_file):
-    """
-    Load and process the text from a .mat file.
-    """
     try:
         text = scipy.io.loadmat(mat_file)["text"][0]
         return process_text(text)
@@ -51,7 +42,6 @@ def faiss_write(data_root="data/pretrain/processed_data"):
     print("Number of Samples: ", len(mat_files))
 
     train_texts = []
-
     with ThreadPoolExecutor() as executor:
         futures = {executor.submit(process_file, mat_file): mat_file for mat_file in mat_files}
 
@@ -61,9 +51,7 @@ def faiss_write(data_root="data/pretrain/processed_data"):
                 train_texts.append(result)
 
     train_texts = list(set(train_texts))
-
     batch_size = 128
-
     all_embeddings = []
 
     for i in tqdm(range(0, len(train_texts), batch_size)):
@@ -89,7 +77,7 @@ def faiss_write(data_root="data/pretrain/processed_data"):
 def faiss_read(query_text, model, tokenizer, index, embedding_to_sample_map,  k=10):
     embedding_to_sample_map = {int(k): v for k, v in embedding_to_sample_map.items()}
 
-    device = "cpu"#torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     query_inputs = tokenizer(query_text, return_tensors="pt").to(device)
     model = model.to(device)
@@ -100,9 +88,6 @@ def faiss_read(query_text, model, tokenizer, index, embedding_to_sample_map,  k=
         query_embedding = normalizer(query_embedding)
 
     distances, indices = index.search(-query_embedding, k)
-
-    # similar_samples = [embedding_to_sample_map[idx] for idx in indices[0]]
-    # return similar_samples
 
     random_idx = random.choice(indices[0])
     random_sample = embedding_to_sample_map[random_idx]

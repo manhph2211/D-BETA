@@ -72,7 +72,7 @@ class RawECGTextDataset(RawECGDataset):
         self.medvill = medvill
         
     def normalize_text(self, text):
-        import re
+        import re # let's preprocess a bit :)
         if isinstance(text, str):
             text = text.lower()
             text = text.strip()

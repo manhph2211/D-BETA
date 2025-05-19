@@ -2,14 +2,6 @@
 #
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-"""
-A standalone module for aggregating metrics.
-
-Metrics can be logged from anywhere using the `log_*` functions defined
-in this module. The logged values will be aggregated dynamically based
-on the aggregation context in which the logging occurs. See the
-:func:`aggregate` context manager for more details.
-"""
 
 import contextlib
 import uuid

@@ -11,8 +11,6 @@ from transformers.modeling_utils import (
 
 
 class BertEmbeddings(nn.Module):
-    """Construct the embeddings from word, position and token_type embeddings."""
-
     def __init__(self, config):
         super().__init__()
         self.word_embeddings = nn.Embedding(config.vocab_size, config.hidden_size, padding_idx=config.pad_token_id)
@@ -107,13 +105,9 @@ class BertSelfAttention(nn.Module):
     ):
         mixed_query_layer = self.query(hidden_states)
 
-        # If this is instantiated as a cross-attention module, the keys
-        # and values come from an encoder; the attention mask needs to be
-        # such that the encoder's padding tokens are not attended to.
         is_cross_attention = encoder_hidden_states is not None
 
         if is_cross_attention and past_key_value is not None:
-            # reuse k,v, cross_attentions
             key_layer = past_key_value[0]
             value_layer = past_key_value[1]
             attention_mask = encoder_attention_mask
@@ -234,7 +228,7 @@ class BertAttention(nn.Module):
             output_attentions,
         )
         attention_output = self.output(self_outputs[0], hidden_states)
-        outputs = (attention_output,) + self_outputs[1:]  # add attentions if we output them
+        outputs = (attention_output,) + self_outputs[1:] 
         return outputs
 
 
@@ -287,8 +281,7 @@ class BertCrossLayer(nn.Module):
             encoder_attention_mask=None,
             output_attentions=False,
     ):
-        # decoder uni-directional self-attention cached key/values tuple is at positions 1,2
-        self_attn_past_key_value = None  # past_key_value[:2] if past_key_value is not None else None
+        self_attn_past_key_value = None  
         self_attention_outputs = self.attention(
             hidden_states,
             attention_mask,
@@ -298,8 +291,7 @@ class BertCrossLayer(nn.Module):
         )
         attention_output = self_attention_outputs[0]
 
-        # if decoder, the last output is tuple of self-attn cache
-        outputs = self_attention_outputs[1:]  # add self attentions if we output attention weights
+        outputs = self_attention_outputs[1:]  
 
         cross_attn_present_key_value = None
         cross_attention_outputs = self.crossattention(
@@ -313,8 +305,6 @@ class BertCrossLayer(nn.Module):
         )
         attention_output = cross_attention_outputs[0]
         outputs = outputs + cross_attention_outputs[1:]
-        # outputs = outputs + cross_attention_outputs[1:-1]  # add cross attentions if we output attention weights
-
         layer_output = apply_chunking_to_forward(
             self.feed_forward_chunk, self.chunk_size_feed_forward, self.seq_len_dim, attention_output
         )

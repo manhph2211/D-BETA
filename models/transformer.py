@@ -92,8 +92,6 @@ class TransformerEncoder(nn.Module):
             x = self.layer_norm(x)
 
         x = F.dropout(x, p=self.dropout, training=self.training)
-
-        # B x T x C -> T x B x C
         x = x.transpose(0, 1)
 
         layer_results = []
@@ -108,7 +106,6 @@ class TransformerEncoder(nn.Module):
                 )
                 layer_results.append(x)
 
-        # T x B x C -> B x T x C
         x = x.transpose(0,1)
 
         return x
@@ -146,7 +143,6 @@ class TransformerModel(PretrainingModel):
 
     @classmethod
     def build_model(cls, cfg, task=None):
-        """Build a new model instance."""
         return cls(cfg)
 
     def apply_mask(

@@ -348,16 +348,11 @@ class RawECGDataset(BaseDataset):
         return self.size(index)
 
     def size(self, index):
-        """Return an examples's size as a float or tuple. This value is used when
-        filtering a dataset with ``--max-positions``."""
         if self.pad:
             return self.sizes[index]
         return min(self.sizes[index], self.max_sample_size)
 
     def ordered_indices(self):
-        """Return an ordered list of indices. Batches will be constructed based
-        on this order."""
-
         if self.shuffle:
             order = [np.random.permutation(len(self))]
             order.append(

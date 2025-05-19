@@ -89,15 +89,11 @@ class DBETA(PretrainingModel):
         self.multi_modal_ecg_pooler.apply(init_weights)
         self.multi_modal_language_pooler = Pooler(cfg.hidden_dim)
         self.multi_modal_language_pooler.apply(init_weights)
-        
-        ## NOTE ETS ##
-    
+            
         self.unimodal_ecg_pooler = Pooler(cfg.hidden_dim)
         self.unimodal_ecg_pooler.apply(init_weights)
         self.unimodal_language_pooler = Pooler(cfg.hidden_dim)
         self.unimodal_language_pooler.apply(init_weights)  
-
-        ## ### ##
 
         self.mlm_head = MLMHead(bert_config)
         self.mlm_head.apply(init_weights)
@@ -151,9 +147,7 @@ class DBETA(PretrainingModel):
         extended_text_masks = self.language_encoder.get_extended_attention_mask(text_attention_mask, text_input_shape)
         uni_modal_text_feats = self.language_encoder(input_ids=text)[0] 
 
-        uni_modal_text_feats = self.multi_modal_language_proj(uni_modal_text_feats)
-        
-        # NOTE This is for ETS #
+        uni_modal_text_feats = self.multi_modal_language_proj(uni_modal_text_feats)        
         ret["uni_modal_text_feats"] = self.unimodal_language_pooler(uni_modal_text_feats)
         
         uni_modal_ecg_feats, ecg_padding_mask = (
@@ -201,8 +195,6 @@ class DBETA(PretrainingModel):
             uni_modal_ecg_feats = self.ecg_encoder.get_output(uni_modal_ecg_feats, ecg_padding_mask)
         
         uni_modal_ecg_feats = self.multi_modal_ecg_proj(uni_modal_ecg_feats)
-
-        # NOTE This is for ETS #
         ret["uni_modal_ecg_feats"] = self.unimodal_ecg_pooler(uni_modal_ecg_feats)
 
         if ecg_padding_mask is not None and ecg_padding_mask.any():
