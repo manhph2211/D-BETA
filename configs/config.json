@@ -1,6 +1,6 @@
 {
     "model": {
-        "_name": "m3ae", 
+        "_name": "", 
         "all_gather": false,
         "normalize": false,
         "filter": false,
