@@ -100,15 +100,6 @@ def neighbour_exchange_bidir_with_grad(left_rank, right_rank, tensor_to_left, te
 
 
 class ETSLoss(nn.Module):
-    """ Sigmoid Loss for Language Image Pre-Training (SigLIP) - https://arxiv.org/abs/2303.15343
-
-    @article{zhai2023sigmoid,
-      title={Sigmoid loss for language image pre-training},
-      author={Zhai, Xiaohua and Mustafa, Basil and Kolesnikov, Alexander and Beyer, Lucas},
-      journal={arXiv preprint arXiv:2303.15343},
-      year={2023}
-    }
-    """
     def __init__(
             self,
             cache_labels=False,
@@ -127,13 +118,6 @@ class ETSLoss(nn.Module):
         self.labels = {}
 
     def get_ground_truth(self, labels: torch.Tensor, num_logits: int) -> torch.Tensor:
-        """
-        Generate ground truth labels matrix based on custom labels.
-
-        :param labels: A tensor of shape (B,) containing binary labels where 1 indicates positive pairs and 0 indicates negative pairs.
-        :param num_logits: The size of the labels matrix to be generated.
-        :return: A tensor of shape (B, B) with 1 for positive pairs and -1 for negative pairs.
-        """
         labels_matrix = -torch.ones((num_logits, num_logits), device=labels.device, dtype=labels.dtype)
         diag_indices = torch.arange(num_logits, device=labels.device)
         labels_matrix[diag_indices, diag_indices] = 2 * labels - 1  # Set diagonal to 1 for positive pairs, -1 for negatives

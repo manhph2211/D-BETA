@@ -10,17 +10,8 @@ class DBETALoss:
         super().__init__()
         self.norm_pix_loss = cfg.norm_pix_loss
         self.siglip = ETSLoss()
-        self.output_store = None
-        self.target_store = None
 
     def forward(self, model, sample, reduce=True):
-        """Compute the loss for the given sample
-        
-        Returns a tuple with three elements:
-        1) the loss
-        2) the sample size, which is used as the denominator for the gradient
-        3) logging outputs to display while training
-        """
         net_output = model(**sample["net_input"]) 
         logits = model.get_logits(net_output)
         target = model.get_targets(sample, net_output, self.norm_pix_loss)
@@ -51,15 +42,12 @@ class DBETALoss:
         )
         loss += itm_loss
         losses.append(itm_loss)
-        itc_loss = self.siglip(logits["itc_uni_modal_feats"][0], logits["itc_uni_modal_feats"][1], target["itm_target"])
-        loss += itc_loss
-        losses.append(itc_loss)
+        ets_loss = self.siglip(logits["itc_uni_modal_feats"][0], logits["itc_uni_modal_feats"][1], target["itm_target"])
+        loss += ets_loss
+        losses.append(ets_loss)
 
         logging_output = {
             "loss": loss.item() if reduce else loss.detach(),
-            "ntokens": sample_size,
-            "nsignals": sample["id"].numel(),
-            "sample_size": sample_size
         }
         
         if len(losses) > 1:
@@ -93,12 +81,7 @@ class DBETALoss:
 
     @staticmethod
     def reduce_metrics(logging_outputs) -> None:
-        """Aggregate logging outputs from data parallel training."""
         loss_sum = item(sum(log.get("loss", 0) for log in logging_outputs))
-        ntokens = item(sum(log.get("ntokens", 0) for log in logging_outputs))
-        nsignals = item(
-            sum(log.get("nsignals", 0) for log in logging_outputs)
-        )
         sample_size = item(
             sum(log.get("sample_size", 0) for log in logging_outputs)
         )
@@ -106,14 +89,8 @@ class DBETALoss:
         log_scalar(
             "loss", loss_sum / (sample_size or 1) / math.log(2), sample_size, round = 3
         )
-        log_scalar("ntokens", ntokens)
-        log_scalar("nsignals", nsignals)
-
-        correct = sum(log.get("mlm_correct", 0) for log in logging_outputs)
-        log_scalar("_mlm_correct", correct)
 
         total = sum(log.get("mlm_count", 0) for log in logging_outputs)
-        log_scalar("_mlm_total", total)
 
         if total > 0:
             log_derived(
@@ -125,11 +102,7 @@ class DBETALoss:
                 else float("nan")
             )
 
-        correct = sum(log.get("itm_correct", 0) for log in logging_outputs)
-        log_scalar("_itm_correct", correct)
-
         total = sum(log.get("itm_count", 0) for log in logging_outputs)
-        log_scalar("_itm_total", total)
 
         if total > 0:
             log_derived(
@@ -159,11 +132,3 @@ class DBETALoss:
                     )
                 else:
                     log_scalar(k, val / len(logging_outputs), round=3)
-
-    def logging_outputs_can_be_summed(self) -> bool:
-        """
-        Whether the logging outputs returned by `forward` can be summed
-        across workers prior to calling `reduce_metrics`. Setting this
-        to True will improves distributed training speed.
-        """
-        return False
