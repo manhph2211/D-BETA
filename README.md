@@ -63,17 +63,11 @@ Finally, to run the code, we can just use the `example.ipynb` notebook.
 
 Quick Note: You can get more information about ECG processing code and literature from this nice [repo](https://github.com/Jwoo5/fairseq-signals/tree/master/fairseq_signals).
 
-```bash
-
-
-```bibtex
-@misc{pham2025boostingmaskedecgtextautoencoders,
-      title={Boosting Masked ECG-Text Auto-Encoders as Discriminative Learners}, 
-      author={Hung Manh Pham and Aaqib Saeed and Dong Ma},
-      year={2025},
-      eprint={2410.02131},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2410.02131}, 
+<!-- ```bibtex
+@article{pham2024c,
+  title={C-MELT: Contrastive Enhanced Masked Auto-Encoders for ECG-Language Pre-Training},
+  author={Pham, Manh and Saeed, Aaqib and Ma, Dong},
+  journal={arXiv preprint arXiv:2410.02131},
+  year={2024}
 }
-```
+``` -->
