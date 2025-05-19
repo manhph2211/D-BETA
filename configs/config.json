@@ -1,6 +1,6 @@
 {
     "model": {
-        "_name": "", 
+        "_name": "D-BETA", 
         "all_gather": false,
         "normalize": false,
         "filter": false,
