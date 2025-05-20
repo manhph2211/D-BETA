@@ -39,13 +39,13 @@
     "TAB": "T-waves abnormalities. Any deviation from the normal T-wave morphology which may indicate various cardiac conditions.",
     "PRC(S)": "PRC(S) premature complex(es). Early beats originating from various cardiac tissues, including atrial, junctional, or ventricular.",
     "AFIB": "AFIB Atrial Fibrillation. Irregular and often rapid heart rate due to uncoordinated atrial activity.",
-    "STACH": "sinus tachycardia. Increased heart rate originating from the sinoatrial node, typically defined as over 100 beats per minute.",
-    "SARRH": "sinus arrhythmia. A natural variation in heart rate occurring during a breathing cycle.",
-    "SBRAD": "sinus bradycardia. Reduced heart rate originating from the sinoatrial node, typically defined as fewer than 60 beats per minute.",
     "PACE": "normal functioning permanent artificial cardiac pacemaker. Proper operation of an implanted pacemaker maintaining heart rhythm.",
     "SVARR": "supraventricular arrhythmia. Any abnormal heart rhythm originating above the ventricles, often resulting in rapid heart rate.",
     "BIGU": "bigeminal supraventricular rhythm. A supraventricular rhythm where every normal beat is followed by a premature beat.",
     "AFLT": "atrial flutter. Rapid, regular atrial contractions typically resulting in a sawtooth pattern on the ECG.",
+    "STACH": "sinus tachycardia. Faster-than-normal heart rate originating in the sinoatrial node, usually above 100 bpm.",
+    "SARRH": "sinus arrhythmia. A natural variation in heart rate occurring during a breathing cycle.",
+    "SBRAD": "sinus bradycardia. Slower-than-normal heart rate originating in the sinoatrial node, usually below 60 bpm.",
     "SVTAC": "supraventricular tachycardia. Rapid heart rate originating from above the ventricles.",
     "PSVT": "paroxysmal supraventricular tachycardia. Episodes of rapid heart rate originating above the ventricles that start and stop abruptly.",
     "TRIGU": "trigeminal pattern (unknown origin). A rhythm disturbance where every third beat is of abnormal origin.",
@@ -87,7 +87,5 @@
     "TWC": "T wave Change. Variations in T wave morphology indicating possible ischemia, electrolyte imbalance, or other conditions.",
     "TWO": "T wave opposite. T wave inversion that is opposite to the direction of the QRS complex.",
     "UW": "abnormal U waves. Unusual U wave morphology seen in conditions like hypokalemia.",
-    "VB": "ventricular bigeminy. Rhythm where every normal beat is followed by a premature ventricular contraction.",
-    "SB": "sinus Bradycardia. Slower-than-normal heart rate originating in the sinoatrial node, usually below 60 bpm.",
-    "ST": "sinus Tachycardia. Faster-than-normal heart rate originating in the sinoatrial node, usually above 100 bpm."
+    "VB": "ventricular bigeminy. Rhythm where every normal beat is followed by a premature ventricular contraction."
 }
