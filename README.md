@@ -46,16 +46,16 @@ This repo provides a quick example of running D-BETA with zero-shot setting on C
 
 ## Usage
 
-First, we need to create a new Python environment and install the following:
+First, we need to clone the project and prepare the environment as the following:
 
 ```bash
-
-* Python version 3.9
-
+git clone https://github.com/manhph2211/D-BETA.git && cd D-BETA
+conda create -n dbeta python=3.9
+conda activate dbeta
 pip install -r requirements.txt
 ```
 
-Next, please download the CODE-test data from [here](https://zenodo.org/records/3765780) and put it into in the `data/downstream/code-test` directory. 
+Next, please download the CODE-test data from [here](https://zenodo.org/records/3765780) and put it into the `data/downstream/code-test` directory. 
 
 Then, we need to download the pre-trained model from [here](https://huggingface.co/Manhph2211/D-BETA), and put it into `checkpoints` directory.
 
