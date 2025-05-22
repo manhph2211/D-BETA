@@ -9,7 +9,7 @@ class DBETALoss:
     def __init__(self, cfg):
         super().__init__()
         self.norm_pix_loss = cfg.norm_pix_loss
-        self.siglip = ETSLoss()
+        self.ets = ETSLoss()
 
     def forward(self, model, sample, reduce=True):
         net_output = model(**sample["net_input"]) 
@@ -42,7 +42,7 @@ class DBETALoss:
         )
         loss += itm_loss
         losses.append(itm_loss)
-        ets_loss = self.siglip(logits["itc_uni_modal_feats"][0], logits["itc_uni_modal_feats"][1], target["itm_target"])
+        ets_loss = self.ets(logits["itc_uni_modal_feats"][0], logits["itc_uni_modal_feats"][1], target["itm_target"])
         loss += ets_loss
         losses.append(ets_loss)
 
@@ -78,57 +78,3 @@ class DBETALoss:
             logging_output["itm_count"] = itm_count
         
         return loss, sample_size, logging_output
-
-    @staticmethod
-    def reduce_metrics(logging_outputs) -> None:
-        loss_sum = item(sum(log.get("loss", 0) for log in logging_outputs))
-        sample_size = item(
-            sum(log.get("sample_size", 0) for log in logging_outputs)
-        )
-
-        log_scalar(
-            "loss", loss_sum / (sample_size or 1) / math.log(2), sample_size, round = 3
-        )
-
-        total = sum(log.get("mlm_count", 0) for log in logging_outputs)
-
-        if total > 0:
-            log_derived(
-                "mlm_accuracy",
-                lambda meters: safe_round(
-                    meters["_mlm_correct"].sum / meters["_mlm_total"].sum, 5
-                )
-                if meters["_mlm_total"].sum > 0
-                else float("nan")
-            )
-
-        total = sum(log.get("itm_count", 0) for log in logging_outputs)
-
-        if total > 0:
-            log_derived(
-                "itm_accuracy",
-                lambda meters: safe_round(
-                    meters["_itm_correct"].sum / meters["_itm_total"].sum, 5
-                )
-                if meters["_itm_total"].sum > 0
-                else float("nan")
-            )
-
-        builtin_keys = {
-            "loss",
-            "ntokens",
-            "nsignals",
-            "sample_size",
-            "correct",
-            "count"
-        }
-
-        for k in logging_outputs[0]:
-            if k not in builtin_keys:
-                val = sum(log.get(k,0) for log in logging_outputs)
-                if k.startswith("loss"):
-                    log_scalar(
-                        k, val / (sample_size or 1) / math.log(2), sample_size, round=3
-                    )
-                else:
-                    log_scalar(k, val / len(logging_outputs), round=3)
