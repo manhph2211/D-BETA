@@ -40,6 +40,7 @@ def init_bert_params(module):
         normal_(module.k_proj.weight.data)
         normal_(module.v_proj.weight.data)
 
+
 class TransformerEncoder(nn.Module):
     def __init__(self, args):
         super().__init__()

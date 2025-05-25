@@ -28,21 +28,21 @@ class DBETALoss:
         )
         losses.append(loss.detach().clone())
 
-        mim_mask = net_output["mim_masks"]
-        mim_loss = (logits["mim_logits"] - target["mim_target"]) ** 2
+        mim_mask = net_output["mem_masks"]
+        mim_loss = (logits["mem_logits"] - target["mem_target"]) ** 2
         mim_loss = mim_loss.mean(dim=-1)
         mim_loss = (mim_loss * mim_mask).sum() / mim_mask.sum()
         loss += mim_loss
         losses.append(mim_loss)
         
         itm_loss = F.cross_entropy(
-            logits["itm_logits"],
-            target["itm_target"],
+            logits["etm_logits"],
+            target["etm_target"],
             reduction=reduction,
         )
         loss += itm_loss
         losses.append(itm_loss)
-        ets_loss = self.ets(logits["itc_uni_modal_feats"][0], logits["itc_uni_modal_feats"][1], target["itm_target"])
+        ets_loss = self.ets(logits["ets_uni_modal_feats"][0], logits["ets_uni_modal_feats"][1], target["etm_target"])
         loss += ets_loss
         losses.append(ets_loss)
 
@@ -67,14 +67,14 @@ class DBETALoss:
             logging_output["mlm_correct"] = mlm_corr
             logging_output["mlm_count"] = mlm_count
             
-            if logits["itm_logits"].numel() == 0:
+            if logits["etm_logits"].numel() == 0:
                 itm_corr = 0
                 itm_count = 0
             else:
-                assert logits["itm_logits"].dim() > 1, logits["itm_logits"].shape
-                itm_corr = (logits["itm_logits"].argmax(-1) == target["itm_target"]).long().sum().item()
-                itm_count = target["itm_target"].numel()
-            logging_output["itm_correct"] = itm_corr
-            logging_output["itm_count"] = itm_count
+                assert logits["etm_logits"].dim() > 1, logits["etm_logits"].shape
+                itm_corr = (logits["etm_logits"].argmax(-1) == target["etm_target"]).long().sum().item()
+                itm_count = target["etm_target"].numel()
+            logging_output["etm_correct"] = itm_corr
+            logging_output["etm_count"] = itm_count
         
         return loss, sample_size, logging_output

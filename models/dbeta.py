@@ -18,11 +18,7 @@ from transformers.models.bert.modeling_bert import (
 from .cross_layer import BertCrossLayer
 from .base import PretrainingModel
 from .transformer import ECGTransformerModel
-
-import warnings
-warnings.filterwarnings("ignore")
-import urllib3
-urllib3.disable_warnings()
+from .supporter import Pooler, PositionalEncoding, LayerNorm, Transformer
 logger = logging.getLogger(__name__)
 
 
@@ -44,8 +40,8 @@ class DBETA(PretrainingModel):
 
         self.vocab_size = cfg.vocab_size
 
-        self.mim_prob = cfg.mim_prob
-        self.mim_layer = cfg.mim_layer
+        self.mim_prob = cfg.mem_prob
+        self.mim_layer = cfg.mem_layer
         
 
         self.ecg_encoder = ECGTransformerModel(cfg)
@@ -97,9 +93,9 @@ class DBETA(PretrainingModel):
 
         self.mlm_head = MLMHead(bert_config)
         self.mlm_head.apply(init_weights)
-        self.mim_head = MIMHead(cfg)
+        self.mim_head = MEMHead(cfg)
         self.mim_head.apply(init_weights)
-        self.itm_head = ITMHead(cfg.hidden_dim * 2)
+        self.itm_head = ETMHead(cfg.hidden_dim * 2)
         self.itm_head.apply(init_weights)
         
     @classmethod
@@ -189,8 +185,8 @@ class DBETA(PretrainingModel):
                 uni_modal_ecg_feats, self.mim_prob
             )
             uni_modal_ecg_feats = self.ecg_encoder.get_output(uni_modal_ecg_feats)
-            ret["mim_masks"] = mim_masks
-            ret["mim_ids_restore"] = mim_ids_restore
+            ret["mem_masks"] = mim_masks
+            ret["mem_ids_restore"] = mim_ids_restore
         else:
             uni_modal_ecg_feats = self.ecg_encoder.get_output(uni_modal_ecg_feats, ecg_padding_mask)
         
@@ -256,24 +252,24 @@ class DBETA(PretrainingModel):
 
             ret.update({
                 "mlm_logits": mlm_logits,
-                "mim_logits": mim_logits,
-                "itm_logits": itm_logits
+                "mem_logits": mim_logits,
+                "etm_logits": itm_logits
             })
         else: 
             itm_logits = self.itm_head(multi_modal_cls_feats)
             ret.update({
-                "itm_logits": itm_logits
+                "etm_logits": itm_logits
             })
         
         return ret
 
     def get_logits(self, net_output):
-        bsz, tsz, _, _ = net_output["mim_logits"].shape
+        bsz, tsz, _, _ = net_output["mem_logits"].shape
         res = {
-            "itc_uni_modal_feats": (net_output["uni_modal_ecg_feats"], net_output["uni_modal_text_feats"]), 
+            "ets_uni_modal_feats": (net_output["uni_modal_ecg_feats"], net_output["uni_modal_text_feats"]), 
             "mlm_logits": net_output["mlm_logits"].view(-1, self.vocab_size),
-            "mim_logits": net_output["mim_logits"].view(bsz, tsz, -1),
-            "itm_logits": net_output["itm_logits"],
+            "mem_logits": net_output["mem_logits"].view(bsz, tsz, -1),
+            "etm_logits": net_output["etm_logits"],
         }
         
         return res
@@ -283,7 +279,7 @@ class DBETA(PretrainingModel):
 
         mim_target = sample["net_input"]["ecg"]
 
-        mim_logits = net_output["mim_logits"]
+        mim_logits = net_output["mem_logits"]
         if mim_target.size(-1) > mim_logits.size(1) * mim_logits.size(-1):
             offset = mim_target.size(-1) - (mim_logits.size(1) * mim_logits.size(-1))
             mim_target = mim_target[:, :, :-offset]
@@ -301,8 +297,8 @@ class DBETA(PretrainingModel):
         
         return {
             "mlm_target": mlm_target,
-            "mim_target": mim_target,
-            "itm_target": itm_target.long()
+            "mem_target": mim_target,
+            "etm_target": itm_target.long()
         }
 
     def extract_features(
@@ -331,18 +327,7 @@ class DBETA(PretrainingModel):
         self.mlm_head = None
         self.mim_head = None
         self.itm_head = None
-
-class Pooler(nn.Module):
-    def __init__(self, hidden_size):
-        super().__init__()
-        self.dense = nn.Linear(hidden_size, hidden_size)
-        self.activation = nn.Tanh()
-
-    def forward(self, hidden_states):
-        first_token_tensor = hidden_states[:, 0]
-        pooled_output = self.dense(first_token_tensor)
-        pooled_output = self.activation(pooled_output)
-        return pooled_output
+        
 
 class MLMHead(nn.Module):
     def __init__(self, config, weight=None):
@@ -358,13 +343,14 @@ class MLMHead(nn.Module):
         x = self.decoder(x) + self.bias
         return x
 
-class MIMHead(nn.Module):
+
+class MEMHead(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.hidden_dim = cfg.hidden_dim
-        self.decoder_hidden_dim = cfg.mim_decoder_hidden_dim
-        self.decoder_num_layers = cfg.mim_decoder_num_layers
-        self.decoder_num_heads = cfg.mim_decoder_num_heads
+        self.decoder_hidden_dim = cfg.mem_decoder_hidden_dim
+        self.decoder_num_layers = cfg.mem_decoder_num_layers
+        self.decoder_num_heads = cfg.mem_decoder_num_heads
 
         self.decoder_embed = nn.Linear(self.hidden_dim, self.decoder_hidden_dim, bias=True)
         self.mask_token = nn.Parameter(torch.zeros(1, 1, self.decoder_hidden_dim))
@@ -404,71 +390,12 @@ class MIMHead(nn.Module):
         x = x.view(x.size(0), x.size(1), -1, self.inferred_decoded_size)
         return x
 
-class ITMHead(nn.Module):
+
+class ETMHead(nn.Module):
     def __init__(self, hidden_size):
         super().__init__()
         self.fc = nn.Linear(hidden_size, 2)
 
     def forward(self, x):
         x = self.fc(x)
-        return x
-
-class PositionalEncoding(nn.Module):
-    def __init__(self, d_model, max_len):
-        super().__init__()
-        position = torch.arange(max_len).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model))
-        pe = torch.zeros(1, max_len, d_model)
-        pe[0, :, 0::2] = torch.sin(position * div_term)
-        pe[0, :, 1::2] = torch.cos(position * div_term)
-        self.register_buffer("pe", pe)
-
-    def forward(self, x): 
-        x = x + self.pe[:, :x.size(1)]
-        return x
-
-class LayerNorm(nn.LayerNorm):
-    def forward(self, x: torch.Tensor):
-        orig_type = x.dtype
-        ret = super().forward(x.type(torch.float32))
-        return ret.type(orig_type)
-
-class QuickGELU(nn.Module):
-    def forward(self, x: torch.Tensor):
-        return x * torch.sigmoid(1.702 * x)
-
-class ResidualAttentionBlock(nn.Module):
-    def __init__(self, d_model: int, n_head: int, attn_mask: torch.Tensor = None):
-        super().__init__()
-        self.attn = nn.MultiheadAttention(d_model, n_head)
-        self.ln_1 = LayerNorm(d_model)
-        self.mlp = nn.Sequential(OrderedDict([
-            ("c_fc", nn.Linear(d_model, d_model * 4)),
-            ("gelu", QuickGELU()),
-            ("c_proj", nn.Linear(d_model * 4, d_model))
-        ]))
-        self.ln_2 = LayerNorm(d_model)
-        self.attn_mask = attn_mask
-
-    def attention(self, x: torch.Tensor, x_mask: torch.Tensor):
-        if x_mask is not None:
-            x_mask = x_mask.to(dtype=torch.bool, device=x.device)
-        self.attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device) if self.attn_mask is not None else None
-        return self.attn(x, x, x, need_weights=False, attn_mask=self.attn_mask, key_padding_mask=x_mask)[0]
-
-    def forward(self, x: torch.Tensor, x_mask: torch.Tensor = None):
-        x = x + self.attention(self.ln_1(x), x_mask)
-        x = x + self.mlp(self.ln_2(x))
-        return x
-
-class Transformer(nn.Module):
-    def __init__(self, width: int, layers: int, heads: int, attn_mask: torch.Tensor = None):
-        super().__init__()
-        self.width = width
-        self.layers = layers
-        self.resblocks = nn.Sequential(*[ResidualAttentionBlock(width, heads, attn_mask) for _ in range(layers - 1)])
-
-    def forward(self, x: torch.Tensor, x_mask: torch.Tensor = None):
-        for block in self.resblocks:
-            x = block(x, x_mask)
         return x
