@@ -1,6 +1,35 @@
 import random
 import numpy as np
-from utils.utils import ChoiceEnum, BUCKET_CHOICE, PERTURBATION_CHOICES
+from enum import Enum, EnumMeta
+from typing import List
+
+
+class StrEnumMeta(EnumMeta):
+    @classmethod
+    def __instancecheck__(cls, other):
+        return "enum" in str(type(other))
+
+
+class StrEnum(Enum, metaclass=StrEnumMeta):
+    def __str__(self):
+        return self.value
+
+    def __eq__(self, other: str):
+        return self.value == other
+
+    def __repr__(self):
+        return self.value
+
+    def __hash__(self):
+        return hash(str(self))
+
+
+def ChoiceEnum(choices: List[str]):
+    """return the Enum class used to enforce list of choices"""
+    return StrEnum("Choices", {k: k for k in choices})
+
+
+BUCKET_CHOICE = ChoiceEnum(["uniform"])
 
 PERTURBATION_CHOICES = ChoiceEnum(
     [
@@ -12,7 +41,9 @@ PERTURBATION_CHOICES = ChoiceEnum(
         "baseline_wander",
     ]
 )
+
 MASKING_LEADS_STRATEGY_CHOICES = ChoiceEnum(["random", "conditional"])
+
 
 def instantiate_from_name(str: PERTURBATION_CHOICES, **kwargs):
     if str == "random_leads_masking":
@@ -28,8 +59,8 @@ def instantiate_from_name(str: PERTURBATION_CHOICES, **kwargs):
     else:
         raise ValueError(f"inappropriate perturbation choices: {str}")
 
+
 def adjust_channel_dependency(ecg):
-    # synthesize III, aVR, aVL, aVF from I, II
     ecg[2] = ecg[1]-ecg[0]
     ecg[3] = -(ecg[1]+ecg[0])/2
     ecg[4] = ecg[0]-ecg[1]/2

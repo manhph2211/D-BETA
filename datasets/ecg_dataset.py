@@ -9,8 +9,7 @@ import torch
 import torch.nn.functional as F
 import neurokit2 as nk
 from typing import List, Optional, Union
-from utils import augmentations
-from utils.utils import ChoiceEnum, BUCKET_CHOICE, PERTURBATION_CHOICES
+from utils.augmentations import PERTURBATION_CHOICES, BUCKET_CHOICE, instantiate_from_name
 from utils.data_utils import compute_mask_indices, get_buckets, get_bucketed_sizes
 from datasets.base_dataset import BaseDataset
 logger = logging.getLogger(__name__)
@@ -57,7 +56,7 @@ class RawECGDataset(BaseDataset):
                 
             for aug, prob in zip(perturbation_mode, p):
                 self.aug_list.append(
-                    augmentations.instantiate_from_name(aug, p=prob, **kwargs)
+                    instantiate_from_name(aug, p=prob, **kwargs)
                 )
 
         self.sizes = []

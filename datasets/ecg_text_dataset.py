@@ -17,12 +17,7 @@ import faiss
 import json
 from transformers import AutoTokenizer, AutoModel, T5EncoderModel
 from datasets.run_faiss import faiss_read
-
 from datasets.ecg_dataset import RawECGDataset
-import warnings
-warnings.filterwarnings("ignore")
-import urllib3
-urllib3.disable_warnings()
 
 logger = logging.getLogger(__name__)
 

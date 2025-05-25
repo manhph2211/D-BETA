@@ -13,3 +13,5 @@ tqdm==4.66.4
 transformers==4.43.3
 omegaconf==2.3.0
 neurokit2==0.2.10
+# faiss-cpu==1.8.0.post1 
+# faiss-gpu==1.7.2
