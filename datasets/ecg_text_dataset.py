@@ -1,7 +1,7 @@
 import os
 import sys
 import logging
-
+import pyarrow
 import scipy.io
 import numpy as np
 import torch
@@ -16,7 +16,7 @@ from transformers import (
 import faiss
 import json
 from transformers import AutoTokenizer, AutoModel, T5EncoderModel
-from datasets.run_faiss import faiss_read
+from datasets.n3s import faiss_read
 from datasets.ecg_dataset import RawECGDataset
 
 logger = logging.getLogger(__name__)
@@ -26,10 +26,9 @@ class RawECGTextDataset(RawECGDataset):
     def __init__(
         self,
         max_text_size=256,
-        tokenizer="", 
-        compute_mlm_indices=False,
-        mlm_prob=0.15,
-        medvill=False,
+        tokenizer="google/flan-t5-base", 
+        compute_mlm_indices=True,
+        mlm_prob=0.25,
         **kwargs
     ):
         super().__init__(**kwargs)
@@ -52,8 +51,6 @@ class RawECGTextDataset(RawECGDataset):
             max_text_size - 2 if max_text_size is not None else sys.maxsize
         )
         self.min_text_size = 0
-        if medvill:
-            self.min_text_size = 10
 
         self.compute_mlm_indices = compute_mlm_indices
         self.mlm_prob = mlm_prob
@@ -63,11 +60,8 @@ class RawECGTextDataset(RawECGDataset):
                 mlm=False, 
                 mlm_probability=self.mlm_prob
             )
-        
-        self.medvill = medvill
-        
+                
     def normalize_text(self, text):
-        import re # let's preprocess a bit :)
         if isinstance(text, str):
             text = text.lower()
             text = text.strip()
@@ -200,12 +194,11 @@ class ProcessedECGTextDataset(RawECGTextDataset):
         self.skipped_indices = set()
 
         with open(manifest_path, 'r') as f:
-            first_line = f.readline().strip() 
             self.root_dir = "data/pretrain/processed_data"
             for i, line in enumerate(f):
                 items = line.strip().split('\t')
                 assert len(items) == 2, line
-                ecg_sz = 5000
+                ecg_sz = 5000 # 10x500
                 if self.min_sample_size is not None and ecg_sz < self.min_sample_size:
                     skipped += 1
                     self.skipped_indices.add(i)
@@ -214,36 +207,23 @@ class ProcessedECGTextDataset(RawECGTextDataset):
                 sizes.append(ecg_sz)
         
         logger.info(f"loaded {len(self.fnames)}, skipped {skipped} samples")
-
         self.sizes = np.array(sizes, dtype=np.int64)
-
-        try:
-            import pyarrow
-
-            self.fnames = pyarrow.array(self.fnames)
-        except:
-            logger.debug(
-                "Could not create a pyarraw array. Please install pyarrow for better performance"
-            )
-            pass
-
+        self.fnames = pyarrow.array(self.fnames)
         self.set_bucket_info(num_buckets)
 
     def __getitem__(self, index):
         path = os.path.join(self.root_dir, str(self.fnames[index]))
-
         res = {'id': index}
-
         data = scipy.io.loadmat(path)
-
         curr_sample_rate = data['curr_sample_rate']
         feats = torch.from_numpy(data['feats'])
+        
         res["original"] = feats
         res["ecg"] = self.postprocess(feats, curr_sample_rate)
         res["text"] = self.normalize_text(data["text"][0])
+        
         if "diagnoses" in data: 
             res["diagnoses"] = [x.strip() for x in data["text"]]
-
         return res
 
     def __len__(self):
