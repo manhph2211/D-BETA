@@ -46,11 +46,11 @@
         "num_heads": 12,
         "drop_rate": 0.1,
         "num_top_layer": 6,
-        "mem_layer": 3,
-        "mem_prob": 0.75,
-        "mem_decoder_hidden_dim": 384,
-        "mem_decoder_num_layers": 4,
-        "mem_decoder_num_heads": 6,
+        "mim_layer": 3,
+        "mim_prob": 0.75,
+        "mim_decoder_hidden_dim": 384,
+        "mim_decoder_num_layers": 4,
+        "mim_decoder_num_heads": 6,
         "max_text_size": 256
     }
 }

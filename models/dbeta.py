@@ -44,8 +44,8 @@ class DBETA(PretrainingModel):
 
         self.vocab_size = cfg.vocab_size
 
-        self.mem_prob = cfg.mem_prob
-        self.mem_layer = cfg.mem_layer
+        self.mim_prob = cfg.mim_prob
+        self.mim_layer = cfg.mim_layer
         
 
         self.ecg_encoder = ECGTransformerModel(cfg)
@@ -97,10 +97,10 @@ class DBETA(PretrainingModel):
 
         self.mlm_head = MLMHead(bert_config)
         self.mlm_head.apply(init_weights)
-        self.mem_head = MIMHead(cfg)
-        self.mem_head.apply(init_weights)
-        self.etm_head = ITMHead(cfg.hidden_dim * 2)
-        self.etm_head.apply(init_weights)
+        self.mim_head = MIMHead(cfg)
+        self.mim_head.apply(init_weights)
+        self.itm_head = ITMHead(cfg.hidden_dim * 2)
+        self.itm_head.apply(init_weights)
         
     @classmethod
     def build_model(cls, cfg, task=None):
@@ -185,12 +185,12 @@ class DBETA(PretrainingModel):
         uni_modal_ecg_feats = torch.cat([cls_emb, uni_modal_ecg_feats], dim=1)
 
         if mask:
-            uni_modal_ecg_feats, mem_masks, mem_ids_restore = self.random_masking(
-                uni_modal_ecg_feats, self.mem_prob
+            uni_modal_ecg_feats, mim_masks, mim_ids_restore = self.random_masking(
+                uni_modal_ecg_feats, self.mim_prob
             )
             uni_modal_ecg_feats = self.ecg_encoder.get_output(uni_modal_ecg_feats)
-            ret["mem_masks"] = mem_masks
-            ret["mem_ids_restore"] = mem_ids_restore
+            ret["mim_masks"] = mim_masks
+            ret["mim_ids_restore"] = mim_ids_restore
         else:
             uni_modal_ecg_feats = self.ecg_encoder.get_output(uni_modal_ecg_feats, ecg_padding_mask)
         
@@ -218,7 +218,7 @@ class DBETA(PretrainingModel):
         for layer_idx, (text_layer, ecg_layer) in enumerate(
             zip(self.multi_modal_language_layers, self.multi_modal_ecg_layers)
         ):
-            if mask and self.mem_layer == layer_idx:
+            if mask and self.mim_layer == layer_idx:
                 (
                     ret[f"multi_modal_text_feats_{layer_idx}"],
                     ret[f"multi_modal_ecg_feats_{layer_idx}"]
@@ -245,35 +245,35 @@ class DBETA(PretrainingModel):
         ret["ecgs"] = ecg
         if mask:
             mlm_logits = self.mlm_head(multi_modal_text_feats)
-            if self.mem_layer == -1:
-                mem_logits = self.mem_head(multi_modal_ecg_feats, mem_ids_restore)
+            if self.mim_layer == -1:
+                mim_logits = self.mim_head(multi_modal_ecg_feats, mim_ids_restore)
             else:
-                mem_logits = (
-                    self.mem_head(ret[f"multi_modal_ecg_feats_{self.mem_layer}"], mem_ids_restore)
+                mim_logits = (
+                    self.mim_head(ret[f"multi_modal_ecg_feats_{self.mim_layer}"], mim_ids_restore)
                 )
             
-            etm_logits = self.etm_head(multi_modal_cls_feats)
+            itm_logits = self.itm_head(multi_modal_cls_feats)
 
             ret.update({
                 "mlm_logits": mlm_logits,
-                "mem_logits": mem_logits,
-                "etm_logits": etm_logits
+                "mim_logits": mim_logits,
+                "itm_logits": itm_logits
             })
         else: 
-            etm_logits = self.etm_head(multi_modal_cls_feats)
+            itm_logits = self.itm_head(multi_modal_cls_feats)
             ret.update({
-                "etm_logits": etm_logits
+                "itm_logits": itm_logits
             })
         
         return ret
 
     def get_logits(self, net_output):
-        bsz, tsz, _, _ = net_output["mem_logits"].shape
+        bsz, tsz, _, _ = net_output["mim_logits"].shape
         res = {
+            "itc_uni_modal_feats": (net_output["uni_modal_ecg_feats"], net_output["uni_modal_text_feats"]), 
             "mlm_logits": net_output["mlm_logits"].view(-1, self.vocab_size),
-            "mem_logits": net_output["mem_logits"].view(bsz, tsz, -1),
-            "etm_logits": net_output["etm_logits"],
-            "ets_uni_modal_feats": (net_output["uni_modal_ecg_feats"], net_output["uni_modal_text_feats"])
+            "mim_logits": net_output["mim_logits"].view(bsz, tsz, -1),
+            "itm_logits": net_output["itm_logits"],
         }
         
         return res
@@ -281,28 +281,28 @@ class DBETA(PretrainingModel):
     def get_targets(self, sample, net_output, norm_pix_loss=True):
         mlm_target = sample["mlm_labels"].view(-1)
 
-        mem_target = sample["net_input"]["ecg"]
+        mim_target = sample["net_input"]["ecg"]
 
-        mem_logits = net_output["mem_logits"]
-        if mem_target.size(-1) > mem_logits.size(1) * mem_logits.size(-1):
-            offset = mem_target.size(-1) - (mem_logits.size(1) * mem_logits.size(-1))
-            mem_target = mem_target[:, :, :-offset]
+        mim_logits = net_output["mim_logits"]
+        if mim_target.size(-1) > mim_logits.size(1) * mim_logits.size(-1):
+            offset = mim_target.size(-1) - (mim_logits.size(1) * mim_logits.size(-1))
+            mim_target = mim_target[:, :, :-offset]
 
         if norm_pix_loss:
-            mean = mem_target.mean(dim=-1, keepdim=True)
-            var = mem_target.var(dim=-1, keepdim=True)
-            mem_target = (mem_target - mean) / (var + 1.e-6) ** .5
-        num_patches = mem_logits.size(1)
-        mem_target = mem_target.view(mem_target.size(0), mem_target.size(1), num_patches, -1)
-        mem_target = mem_target.permute(0, 2, 1, 3)
-        mem_target = mem_target.contiguous().view(mem_target.size(0), mem_target.size(1), -1)
+            mean = mim_target.mean(dim=-1, keepdim=True)
+            var = mim_target.var(dim=-1, keepdim=True)
+            mim_target = (mim_target - mean) / (var + 1.e-6) ** .5
+        num_patches = mim_logits.size(1)
+        mim_target = mim_target.view(mim_target.size(0), mim_target.size(1), num_patches, -1)
+        mim_target = mim_target.permute(0, 2, 1, 3)
+        mim_target = mim_target.contiguous().view(mim_target.size(0), mim_target.size(1), -1)
 
-        etm_target = sample["is_aligned"]
+        itm_target = sample["is_aligned"]
         
         return {
             "mlm_target": mlm_target,
-            "mem_target": mem_target,
-            "etm_target": etm_target.long()
+            "mim_target": mim_target,
+            "itm_target": itm_target.long()
         }
 
     def extract_features(
@@ -329,8 +329,8 @@ class DBETA(PretrainingModel):
 
     def remove_pretraining_modules(self):
         self.mlm_head = None
-        self.mem_head = None
-        self.etm_head = None
+        self.mim_head = None
+        self.itm_head = None
 
 class Pooler(nn.Module):
     def __init__(self, hidden_size):
@@ -362,9 +362,9 @@ class MIMHead(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.hidden_dim = cfg.hidden_dim
-        self.decoder_hidden_dim = cfg.mem_decoder_hidden_dim
-        self.decoder_num_layers = cfg.mem_decoder_num_layers
-        self.decoder_num_heads = cfg.mem_decoder_num_heads
+        self.decoder_hidden_dim = cfg.mim_decoder_hidden_dim
+        self.decoder_num_layers = cfg.mim_decoder_num_layers
+        self.decoder_num_heads = cfg.mim_decoder_num_heads
 
         self.decoder_embed = nn.Linear(self.hidden_dim, self.decoder_hidden_dim, bias=True)
         self.mask_token = nn.Parameter(torch.zeros(1, 1, self.decoder_hidden_dim))
