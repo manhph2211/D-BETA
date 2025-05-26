@@ -57,7 +57,6 @@ class RawECGTextDataset(RawECGDataset):
         if self.compute_mlm_indices:
             self.mlm_collator = DataCollatorForLanguageModeling( 
                 tokenizer=self.tokenizer,
-                mlm=False, 
                 mlm_probability=self.mlm_prob
             )
                 
