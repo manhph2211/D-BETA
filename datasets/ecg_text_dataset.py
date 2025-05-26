@@ -166,22 +166,6 @@ class RawECGTextDataset(RawECGDataset):
 
         return out
 
-    def ordered_indices(self):
-        """Return an ordered list of indices. Batches will be constructed based
-        on this order."""
-
-        if self.shuffle:
-            order = [np.random.permutation(len(self))]
-            return order[0]
-        else:
-            return np.arange(len(self))
-    
-    def sample_negative(self, dx, candidates, diagnoses):
-        for cand in candidates:
-            if dx != diagnoses[cand]:
-                return cand
-        return None
-
 
 class ProcessedECGTextDataset(RawECGTextDataset):
     def __init__(self, manifest_path, num_buckets=0, **kwargs):
