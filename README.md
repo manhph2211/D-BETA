@@ -75,11 +75,15 @@ This research was supported by the Google South Asia & Southeast Asia research a
 
 We are thankful for the valuable work provided by this nice [repo](https://github.com/Jwoo5/fairseq-signals/tree/master/fairseq_signals) and [repo](https://github.com/cheliu-computation/MERL-ICML2024).
 
-<!-- ```bibtex
-@article{pham2024c,
-  title={C-MELT: Contrastive Enhanced Masked Auto-Encoders for ECG-Language Pre-Training},
-  author={Pham, Manh and Saeed, Aaqib and Ma, Dong},
-  journal={arXiv preprint arXiv:2410.02131},
-  year={2024}
+## :page_facing_up: Citation
+
+If you find this work useful :smiley:, please consider citing our paper:
+
+```bibtex
+@misc{pham2025dbeta,
+      title={Boosting Masked ECG-Text Auto-Encoders as Discriminative Learners}, 
+      author={Hung Manh Pham and Aaqib Saeed and Dong Ma},
+      year={2025},
+      url={https://arxiv.org/abs/2410.02131}, 
 }
-``` -->
+```
