@@ -354,13 +354,7 @@ class RawECGDataset(BaseDataset):
     def ordered_indices(self):
         if self.shuffle:
             order = [np.random.permutation(len(self))]
-            order.append(
-                np.minimum(
-                    np.array(self.sizes),
-                    self.max_sample_size
-                )
-            )
-            return np.lexsort(order)[::-1]
+            return order[0]
         else:
             return np.arange(len(self))
 

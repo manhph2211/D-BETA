@@ -118,17 +118,14 @@ class RawECGTextDataset(RawECGDataset):
         if "text" in samples[0]: 
             bsz = len(samples)
             is_aligned = torch.ones((bsz,))
-            
             num_negatives = int((bsz * 0.5 + np.random.rand()))
-
             neg_idcs = np.random.choice(bsz, size=num_negatives, replace=False)
             
             for i in neg_idcs:
                 text = self.normalize_text(samples[i]["text"])
-                least_sim_texts = faiss_read(text, self.faiss_lm, self.faiss_tokenizer, self.faiss_index, self.faiss_embedding_to_sample_map, 64)
-                random_negative = least_sim_texts 
+                sim_text = faiss_read(text, self.faiss_lm, self.faiss_tokenizer, self.faiss_index, self.faiss_embedding_to_sample_map, 64)
                 ids = self.tokenizer(
-                    random_negative,
+                    sim_text,
                     padding="max_length",
                     truncation=True,
                     max_length=max_len,
