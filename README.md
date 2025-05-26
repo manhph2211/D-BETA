@@ -73,7 +73,7 @@ Finally, to run the code, we can just use the `example.ipynb` notebook.
 
 This research was supported by the Google South Asia & Southeast Asia research award.
 
-We are thankful for the valuable work provided by this nice [repo](https://github.com/Jwoo5/fairseq-signals/tree/master/fairseq_signals) and [repo](https://github.com/cheliu-computation/MERL-ICML2024).
+We are also thankful for the valuable work provided by this nice [repo](https://github.com/Jwoo5/fairseq-signals/tree/master/fairseq_signals) and [repo](https://github.com/cheliu-computation/MERL-ICML2024).
 
 ## :page_facing_up: Citation
 
