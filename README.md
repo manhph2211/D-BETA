@@ -31,7 +31,7 @@ Despite the widespread use of ECGs, there's a lack of general-purpose models tha
 
 Across comprehensive evaluation, D-BETA consistently outperforms strong baselines on 100+ cardiac conditions, offering a scalable, self-supervised path toward accurate, label-efficient heart health AI worldwide.
 
-This repo provides a quick example of running D-BETA with zero-shot setting on CODE-15 test dataset. It is structured as follows:
+This repo provides a quick example of running D-BETA with a zero-shot experiment on CODE-15 test dataset. It is structured as follows:
 
 ```angular2html
 .
@@ -54,7 +54,7 @@ This repo provides a quick example of running D-BETA with zero-shot setting on C
 
 ## :book: Usage
 
-First, we need to clone the project and prepare the environment as the following:
+First, we need to clone the project and prepare the environment as follows:
 
 ```bash
 git clone https://github.com/manhph2211/D-BETA.git && cd D-BETA
@@ -77,7 +77,7 @@ We are thankful for the valuable work provided by this nice [repo](https://githu
 
 ## :page_facing_up: Citation
 
-If you find this work useful :smiley:, please consider citing our paper:
+If you find this work useful :smile:, please consider citing our paper:
 
 ```bibtex
 @misc{pham2025dbeta,
