@@ -1,6 +1,6 @@
 
 <div align="center" style="font-size: 5em;">
-  <strong>Boosting Masked ECG-Text Auto-Encoders as Discriminative Learners</strong>
+  <strong>Boosting Masked ECG-Text Auto-Encoders as Discriminative Learners (ICML25)</strong>
   <br> </br> 
 </div>
 
