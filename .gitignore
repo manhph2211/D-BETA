@@ -26,6 +26,7 @@ outputs/
 *.sh
 examples/checkpoints/*.pt
 run.py
+main.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
