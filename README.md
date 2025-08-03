@@ -27,11 +27,11 @@
 
 Cardiovascular diseases are the leading cause of death worldwide, accounting for an estimated 17.9 million deaths annually, which is about 32% of all global deaths. Electrocardiograms (ECGs) play a crucial role in diagnosing these conditions, with over 300 million ECGs performed each year globally.
 
-Despite the widespread use of ECGs, there's a lack of general-purpose models that can effectively interpret ECG data across diverse populations and conditions. Our work presents D-BETA, a new approach that learns directly from both ECG signals and their relevant textual reports simultaneously without needing exact manual labels. D-BETA not only captures subtle details in each type of data but also learns how they connect, helping it make a better foundation model with more accurate decisions.
+Despite the widespread use of ECGs, there's a lack of publicly available general-purpose models that can effectively interpret ECG data across diverse populations and conditions. Our work presents D-BETA, an approach that learns general knowledge from both ECG signals and their relevant textual reports simultaneously without needing exact manual labels during pre-training. D-BETA not only captures subtle details in each type of data but also learns how they connect, helping it make a better foundation model with more accurate decisions in downstream tasks.
 
-Across comprehensive evaluation, D-BETA consistently outperforms strong baselines on 100+ cardiac conditions, offering a scalable, self-supervised path toward accurate, label-efficient heart health AI worldwide.
+Across comprehensive evaluation, D-BETA consistently outperforms strong baselines on multiple cardiac conditions, offering a scalable, self-supervised path toward accurate, label-efficient heart health AI worldwide.
 
-This repo provides a quick example of running D-BETA with a zero-shot experiment on CODE-15 test dataset. It is structured as follows:
+This repository shows how to perform inference with the model and includes a quick example of running D-BETA in a zero-shot setting on the CODE-15 test dataset. The structure is as follows:
 
 ```angular2html
 .
