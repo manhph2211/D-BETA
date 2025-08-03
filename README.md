@@ -11,7 +11,7 @@
 </div>
 
 <div align="center">
-  <a href="https://github.com/manhph2211/" target="_blank">Hung&nbsp;Manh&nbsp;Pham</a> &emsp;
+  <a href="https://manhph2211.github.io/" target="_blank">Hung&nbsp;Manh&nbsp;Pham</a> &emsp;
   <a href="https://aqibsaeed.github.io/" target="_blank">Aaqib&nbsp;Saeed</a> &emsp;
   <a href="https://www.dongma.info/" target="_blank">Dong&nbsp;Ma</a> &emsp;
 </div>
@@ -67,7 +67,19 @@ Next, please download the CODE-test data from [here](https://zenodo.org/records/
 
 Then, we need to download the pre-trained model from [here](https://huggingface.co/Manhph2211/D-BETA), and put it into `checkpoints` directory.
 
-Finally, to run the code, we can just use the `example.ipynb` notebook. 
+Finally, to run the code, we can just use the `example.ipynb` notebook. You can also run the following command to execute the encoder only for feature extraction:
+
+```python
+
+import torch
+from models.processor import get_model, get_ecg_feats
+
+model = get_model(config_path='configs/config.json', checkpoint_path='checkpoints/sample.pt')
+ecgs = torch.randn(2, 12, 5000)  # [batch, leads, length], 5000 = 10s x 500Hz 
+ecg_features = get_ecg_feats(model, ecgs)
+print(ecg_features.shape) # (2, 768)
+
+```
 
 ## :memo: Acknowledgments
 
