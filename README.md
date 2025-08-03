@@ -31,7 +31,7 @@ Despite the widespread use of ECGs, there's a lack of publicly available general
 
 Across comprehensive evaluation, D-BETA consistently outperforms strong baselines on multiple cardiac conditions, offering a scalable, self-supervised path toward accurate, label-efficient heart health AI worldwide.
 
-This repository shows how to perform inference with the model and includes a quick example of running D-BETA in a zero-shot setting on the CODE-15 test dataset. The structure is as follows:
+This repository shows how to perform inference with the model and includes a quick example in a zero-shot setting on the CODE-15 test dataset. The structure is as follows:
 
 ```angular2html
 .
