@@ -23,7 +23,7 @@
 
 ## :rocket: Introduction
 
-**What about an ECG signal foundation model?**
+**What about an ECG foundation model?**
 
 Cardiovascular diseases are the leading cause of death worldwide, accounting for an estimated 17.9 million deaths annually, which is about 32% of all global deaths. Electrocardiograms (ECGs) play a crucial role in diagnosing these conditions, with over 300 million ECGs performed each year globally.
 
