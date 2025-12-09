@@ -11,7 +11,7 @@
 </div>
 
 <div align="center">
-  <a href="https://manhph2211.github.io/" target="_blank">Hung&nbsp;Manh&nbsp;Pham</a> &emsp;
+  <a href="https://maxph2211.dev/" target="_blank">Hung&nbsp;Manh&nbsp;Pham</a> &emsp;
   <a href="https://aqibsaeed.github.io/" target="_blank">Aaqib&nbsp;Saeed</a> &emsp;
   <a href="https://www.dongma.info/" target="_blank">Dong&nbsp;Ma</a> &emsp;
 </div>
