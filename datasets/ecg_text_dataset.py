@@ -61,16 +61,15 @@ class RawECGTextDataset(RawECGDataset):
             )
                 
     def normalize_text(self, text):
-        if isinstance(text, str):
-            text = text.lower()
-            text = text.strip()
-            report = text.replace('ekg', 'ecg')
-            report = report.strip('*** ')
-            report = report.strip(' ***')
-            report = report.strip('***')
-            report = report.strip('=-')
-            report = report.strip('=')
-        return text
+        text = text.lower()
+        text = text.strip()
+        report = text.replace('ekg', 'ecg')
+        report = report.strip('*** ')
+        report = report.strip(' ***')
+        report = report.strip('***')
+        report = report.strip('=-')
+        report = report.strip('=')
+        return report
 
     def collator(self, samples):
         texts = []    
