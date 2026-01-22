@@ -92,9 +92,11 @@ We are also thankful for the valuable work provided by this nice [repo](https://
 If you find this work useful :smile:, please consider citing our paper:
 
 ```bibtex
-@inproceedings{hungboosting,
-  title={Boosting Masked ECG-Text Auto-Encoders as Discriminative Learners},
-  author={Hung, Manh Pham and Saeed, Aaqib and Ma, Dong},
-  booktitle={Forty-second International Conference on Machine Learning}
+@inproceedings{
+  hung2025boosting,
+  title={Boosting Masked {ECG}-Text Auto-Encoders as Discriminative Learners},
+  author={Manh Pham Hung and Aaqib Saeed and Dong Ma},
+  booktitle={Forty-second International Conference on Machine Learning},
+  year={2025},
 }
 ```
