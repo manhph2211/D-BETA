@@ -47,14 +47,14 @@ This repository shows how to perform inference with the model and includes a qui
 ├── models
 │   ├── modules
 │   └── dbeta.py
-└── infer.ipynb
+└── example.ipynb
 └── README.md
 
 ```
 
 ## :book: Usage
 
-### Load with `transformers`
+### Load with `transformers 4.36.2`
 
 ```python
 from transformers import AutoModel
